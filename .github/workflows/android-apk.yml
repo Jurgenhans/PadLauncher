@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,18 +25,26 @@ jobs:
         with:
           gradle-version: "8.7"
 
-      - name: Build APK
+      - name: Extract corrected V2 project
         run: |
-          unzip -q PadLauncher_GitHub_Buildpaket.zip -d project-src
+          unzip -q PadLauncher_Multitasking_Fix_v2.zip -d project-src
           PROJECT_DIR="$(dirname "$(find project-src -name settings.gradle.kts -print -quit)")"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Generate Gradle Wrapper
+        run: |
           cd "$PROJECT_DIR"
           gradle wrapper --gradle-version 8.7
           chmod +x gradlew
+
+      - name: Build APK
+        run: |
+          cd "$PROJECT_DIR"
           ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: PadLauncher-APK
+          name: PadLauncher-Multitasking-Fix-V2
           path: project-src/**/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
